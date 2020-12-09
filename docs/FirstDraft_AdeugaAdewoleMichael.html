@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset = "utf-8">
+<meta name = "viewport" content= "initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>First Draft</title>
+<style>
+    html, body {
+        width: 100%;
+        height: 100%;
+        background-color:dimgray;
+    } 
+    
+   #maps {
+         float: right;
+        right: 0;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        }
+     #header {
+        width: 100%;
+        background-color: lightcoral;
+        height: 10%;
+        text-align: center;
+        color: white;
+    }
+    
+     #titleDiv{
+            float: left;
+            height: 25px;
+        width: 49.5%;
+        background-color: dimgray;
+            color: white;
+            text-align: center;
+            padding-right: 0.5%;
+            font-weight: 400;
+            font-size: 25px;
+    }
+     #StoreDiv {
+        float: bottom;
+        right: 0;
+        padding: 0;
+        margin: 0;
+        height: 2%;
+        width: 100%;
+        background-color: dimgray;
+        height: 2%;
+        text-align: center;
+        color: white;
+        font-weight: 400;
+            font-size: 25px;
+    }
+    
+    
+#viewDiv1 {
+padding: 0;
+float: left;
+left:1px;
+margin: 2px;
+height: 100%;
+width:  50%
+}
+    #viewDiv2 {
+        float: top;
+        right: 0;
+        padding: 1px;
+        margin: 2px;
+        height: 48%;
+        width: 48%
+    }
+    
+    #viewDiv3 {
+        float: bottom;
+        right: 0;
+        padding: 1px;
+        margin: 10px;
+        height: 48%;
+        width: 48%;
+    }
+</style>
+<link rel = "stylesheet" href= "https://js.arcgis.com/4.11/esri/themes/light/main.css"/>
+<script src = "https://js.arcgis.com/4.12/"></script>
+    <script>
+    require([
+        "esri/Map",
+        "esri/Basemap",
+        "esri/views/MapView",
+        "esri/config",
+        "esri/layers/FeatureLayer",
+        "esri/layers/CSVLayer",
+        "dojo/domReady!"
+    ], function(
+          Map, Basemap, MapView, esriConfig, FeatureLayer, CSVLayer, SimpleMarkerSymbol)
+        {
+        var map1 = new Map({
+            basemap: "topo"
+        });
+        var myview = new MapView({
+            map: map1,
+            container: "viewDiv1",
+            zoom: 6,
+            center: [-82.71121, 40.41305]
+        });
+        
+        var map2 = new Map ({
+            basemap: "topo"
+        });
+        
+        var view2= new MapView({
+            map: map2,
+            container: "viewDiv2",
+            zoom: 6,
+            center: [-82.71121, 40.41305]
+        });
+        
+        var map3 = new Map({
+            basemap: "topo"
+        });
+        
+        var view3 = new MapView({
+            map: map3,
+            container: "viewDiv3",
+            zoom: 10,
+            center: [-84.1922, 39.760983]
+        });
+        
+        
+        function createSymbol(color) {
+            return {
+                type: "simple-fill",
+                color: color,
+                outline: {
+                    width: 0.5,
+                    color: [255, 255, 255, 0.4]
+                },
+                style: "solid"
+            };
+        }  
+        
+        var renderer1 = {
+            type: "class-breaks",
+            field: "POP100",
+            normalizationType: "field",
+            normalizationField: "AREALAND",
+            classBreakInfos: [{
+                minValue: 0.00001,
+                maxValue: 0.000099,
+                symbol: createSymbol("#fef0d9"),
+                label: "0-9 people per sq.m"
+            }, {
+                minValue: 0.000100,
+                maxValue: 0.000159,
+                symbol: createSymbol("#fdcc8a"),
+                label: "10 - 15 people per sq.m"
+            }, {
+                minValue: 0.000160,
+                maxValue: 0.000279,
+                symbol: createSymbol("#fc8d59"),
+                label: "16 - 27 people per sq.m"
+            }, {
+                minValue: 0.000280,
+                maxValue: 0.000519,
+                symbol: createSymbol("#e34a33"),
+                label: "28 - 51 people per sq.m"
+            }, {
+                minValue: 0.000520,
+                maxValue: 0.00200,
+                symbol: createSymbol("#b30000"),
+                label: "52- 200 people per sq.m"
+            }]
+        };
+        
+        var pop2000 = new FeatureLayer ({
+            url: "https://tigerweb.geo.census.gov/arcgis/rest/services/Census2010/State_County/MapServer/31",
+            definitionExpression: "STATE =39",
+            renderer: renderer1,
+            title: "2000 Population"
+           
+            
+        });
+        map1.add(pop2000);
+        
+        var pop2010 = new FeatureLayer ({
+            url: "https://tigerweb.geo.census.gov/arcgis/rest/services/Census2010/State_County/MapServer/13",
+            definitionExpression: "STATE = 39",
+            renderer: renderer1,
+            title: "2010 Population"
+        });
+        
+        map2.add(pop2010);
+        
+     const PntRenderer = {
+         type: "unique-value",
+         field: "Classification",
+         defaultSymbol: {type: "simple-marker"},
+         uniqueValueInfos: [
+             {
+                 value: "Big box",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "cadetblue",
+                     size: 8,
+                     label: "Big box stores"
+                 }
+             }, {
+                 value: "Small box",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "green",
+                     size: 8,
+                     label: "small box stores"
+            
+                 }
+             }, {
+                 value: "Convenience store",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "brown",
+                     size: 8,
+                     label: "Convenience stores"
+             }
+             }, {
+                 value: "Groccery store",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "burlywood",
+                     size: 8,
+                     label: "Groccery Stores"
+                 }
+             }, {
+                 value: "Speciality store",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "orange",
+                     size: 8,
+                     label: "Speciality stores"
+    
+                 }
+             },  {
+                 value: "Resturant",
+                 symbol: {
+                     type: "simple-marker",
+                     color: "purple",
+                     size: 8,
+                     label: "Resturants"
+                 }
+    
+             }]
+     }
+        var url =  "https://dl.dropboxusercontent.com/s/5rjmq7dmqguav0b/Ohio.csv?dl=0";
+ esriConfig.request.corsEnabledServers.push(url);
+        var template = {
+            title:  "Store Information",
+            content: " Name: {Name}, Store type: {Classification}, Address: {Address}, County: {County}, Zip Code: {Zip5}."
+        };
+        
+        var stores = new CSVLayer ({
+            url: url,
+            renderer: PntRenderer,
+            title: "Store Locations",
+            copyright: "SNAP",
+            popupTemplate: template
+        });
+           map3.add(stores);
+        });
+    
+    
+    </script>
+</head>
+<body>
+<div id = "header"; style = "display: table; height: 15px; overflow: hidden;"><h1 style = "vertical align: middle">Population Change in Ohio and Economic Distribution</h1></div>
+<div id = "titleDiv">Population Density 2000</div>
+<div id = "titleDiv">Population Density 2010</div>
+<div id = "maps"><div id = "viewDiv1"></div>
+<div id = "viewDiv2"></div>
+<div id = "StoreDiv">Store Location in Dayton</div>
+<div id = "viewDiv3"></div></div>
+</body>
+</html>
+
